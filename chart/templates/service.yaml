@@ -1,0 +1,30 @@
+{{- if .Values.service.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "info.name" . }}
+  namespace: {{default "development" .Values.global.namespace}}
+  labels:
+    app: {{ template "info.name" . }}
+    chart: {{ template "info.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    {{- range $key, $value := .Values.tags }}
+    {{ $value }}: "tag"
+    {{- end }}
+  annotations:
+    consul.register/enabled: "true"
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - name: {{ .Values.grpcPortname }}
+      port: {{ .Values.grpcPort }}
+      targetPort: {{ .Values.grpcPort }}
+    - name: {{ .Values.mgmntPortname }}
+      port: {{ .Values.mgmntPort }}
+      targetPort: {{ .Values.mgmntPort }}
+  sessionAffinity: None
+  selector:
+    app: {{ template "info.name" . }}
+    release: {{ .Release.Name }}
+{{- end }}

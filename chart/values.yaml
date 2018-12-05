@@ -1,0 +1,60 @@
+# Default values for geo-info.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+grpcPort: 8080
+grpcPortname: grpc
+mgmntPort: 8081
+mgmntPortname: mgmnt
+
+image:
+  repository: registry/library/info
+  tag: "0.0.2"
+  pullPolicy: IfNotPresent
+
+service:
+  enabled: true
+  name: info
+  type: NodePort
+
+resources:
+  limits:
+    cpu: 2
+    memory: 8192Mi
+  requests:
+    cpu: 1
+    memory: 4096Mi
+
+nodeSelector: {}
+
+env:
+  SERVICE_8080_NAME: "info"
+  SERVICE_8080_TAGS: "balance,grpc,path=/api.Info/"
+  SERVICE_8081_NAME: "info-mgmnt"
+
+tags:
+  srv_8080_tag1: "balance"
+  srv_8080_tag2: "grpc"
+  srv_8080_tag3: "api.Info"
+
+args:
+  - --consul.addr=consul.svc.cluster.local:8500
+  - --datafile=/data/info.data
+  - --verbose
+
+strategy: |
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 2
+    maxUnavailable: 1
+
+persistence:
+  enabled: true
+  mountPath: /opt/info
+  storageClass: ""
+  accessMode: ReadWriteMany
+  size: 2Gi
+
+global:
+  namespace: "development"

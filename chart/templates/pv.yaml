@@ -1,0 +1,21 @@
+{{- if .Values.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+ name: data
+ namespace: {{default "development" .Values.global.namespace}}
+ labels:
+   name: data
+   app: {{ template "info.name" . }}
+   chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+   release: "{{ .Release.Name }}"
+   heritage: "{{ .Release.Service }}"
+spec:
+ capacity:
+   storage: {{ .Values.persistence.size }}
+ accessModes:
+   - {{ .Values.persistence.accessMode }}
+ persistentVolumeReclaimPolicy: Retain
+ hostPath:
+    path: {{ .Values.persistence.mountPath }}
+{{- end }}
